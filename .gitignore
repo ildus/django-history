@@ -1,0 +1,11 @@
+*.pyc
+*.pyo
+.project
+.metadata
+.pydevproject
+.settings
+pip-log.txt
+*.*~
+.~*
+*.log
+.sass-cache
