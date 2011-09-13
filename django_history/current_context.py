@@ -28,10 +28,10 @@ class CurrentUserMiddleware(object):
             
         user = request.user if hasattr(request, 'user') and request.user.is_authenticated() else None
 
-        update_context = curry(self.update_context, user, request.office)
+        update_context = curry(self.update_context, user)
         signals.pre_save.connect(update_context, dispatch_uid=request, weak=False)
 
-    def update_context(self, user, office, sender, instance, **kwargs):
+    def update_context(self, user, sender, instance, **kwargs):
         registry = FieldRegistry()
         if sender in registry:
             for field in registry.get_fields(sender):
