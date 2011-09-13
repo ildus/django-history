@@ -73,7 +73,7 @@ def get_info(model, self, prefix = None):
             'user': full_name,
             'type': model._meta.module_name,
             'attr': attr,
-            'attr_verbose': prefix + field.verbose_name or 'undefined!',
+            'attr_verbose': prefix + (field.verbose_name or 'undefined!'),
             'old': verbose_value(field, old),
             'new': verbose_value(field, new),
             'date': date,
