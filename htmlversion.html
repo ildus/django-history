@@ -1,0 +1,56 @@
+Здравствуйте, решил поделиться приложением для сохранения истории изменений объектов. Технику взял из книги <a href="http://prodjango.com/">Pro Django (автор Marty Alchin)</a>.<br/>
+<br/>
+Приложение умеет:<br/>
+<ol>
+<li> сохранять все изменения объекта </li>
+<li> откатывать изменения </li>
+<li> просто включается, не требует создания вручную моделей для сохранения истории, при этом история изменений хранится в разных таблицах для каждой модели </li>
+</ol><br/>
+<a name="habracut"></a><br/>
+Весь код лежит здесь <a href="https://github.com/ildus/django-history">https://github.com/ildus/django-history</a>. Можно установить с помощью pip: <br/>
+<code>pip install -e git+git://github.com/ildus/django-history.git#egg=django-history</code><br/>
+<br/>
+<h5>Установка:</h5><br/>
+<ul>
+<li> добавляем в мидлвары <code>django_history.current_context.CurrentUserMiddleware</code> </li>
+<li> в модели, для которого нужно сохранять историю, добавляем <br/>
+<br/>
+<pre><code>from django_history.models import HistoricalRecords
+history = HistoricalRecords()</code></pre><br/>
+</li>
+<li> выполнить syncdb </li>
+</ul><br/>
+Middleware нужен, для того чтобы сохранить какой пользователь сделал изменения.<br/>
+<br/>
+<h5>Использование:</h5><br/>
+Можно получить историю всех изменений в модели или объекте модели. Например, так<br/>
+<br/>
+<pre><code>(InteractiveConsole)
+&gt;&gt;&gt; from main.models import Poll
+&gt;&gt;&gt; Poll.objects.create(language = 'en',question = 'Where are we?')
+&lt;Poll: Where are we?&gt;
+&gt;&gt;&gt; poll = Poll.objects.all()[0]
+&gt;&gt;&gt; poll.language = 'ru'
+&gt;&gt;&gt; poll.save()
+&gt;&gt;&gt; poll.history.all()
+[&lt;HistoricalPoll: Changed by None on 2011-09-10 15:49:48.609916, {'language': (u'en', 'ru')}&gt;, &lt;HistoricalPoll: Created by None on 2011-09-10 15:49:00.355074, {}&gt;]
+</code></pre><br/>
+При авторизованном пользователе, будет видно кто изменил объект.<br/>
+<br/>
+Можно откатывать изменения. Нужно учесть, что откат тоже является изменением и тоже идет в историю<br/>
+<br/>
+<pre><code>&gt;&gt;&gt; poll.history.all()[0].revert()
+&gt;&gt;&gt; poll.history.all()
+[&lt;HistoricalPoll: Changed by None on 2011-09-10 17:24:30.570957, {'language': (u'ru', u'en')}&gt;, &lt;HistoricalPoll: Created by None on 2011-09-10 15:49:00.355074, {}&gt;]
+</code></pre><br/>
+Можно получать историю не только по объекту, но и по всей модели<br/>
+<br/>
+<pre><code>&gt;&gt;&gt; poll2 = Poll.objects.create(language = 'cz',question = 'Who are we?')
+&gt;&gt;&gt; poll2.language = 'cs'
+&gt;&gt;&gt; poll2.save()
+&gt;&gt;&gt; Poll.history.all()
+[&lt;HistoricalPoll: Changed by None on 2011-09-10 17:27:01.669054, {'language': (u'cz', 'cs')}&gt;, &lt;HistoricalPoll: Created by None on 2011-09-10 17:26:30.827953, {}&gt;, &lt;HistoricalPoll: Created by None on 2011-09-10 17:25:57.839304, {}&gt;, &lt;HistoricalPoll: Changed by None on 2011-09-10 17:24:30.570957, {'language': (u'ru', u'en')}&gt;, &lt;HistoricalPoll: Created by None on 2011-09-10 15:49:00.355074, {}&gt;]
+</code></pre><br/>
+<br/>
+Вот и все! Детали реализации лучше смотреть прямо в коде, благо его там не так много. А если коротко, то все реализовано через сигналы и метода contribute_to_class, который отрабатывает для полей модели.
+    
