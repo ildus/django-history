@@ -36,7 +36,6 @@ Middleware нужен, для того чтобы сохранить какой 
 Можно получить историю всех изменений в модели или объекте модели. Например,
 так
 
-    (InteractiveConsole)
     >>> from main.models import Poll
     >>> Poll.objects.create(language = 'en',question = 'Where are we?')
     <Poll: Where are we?>
