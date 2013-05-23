@@ -260,7 +260,7 @@ class FullHistoricalRecords(object):
         fields = {'__module__': model.__module__}
 
         for field in model._meta.fields:
-            field = copy.copy(field)
+            field = copy(field)
 
             if isinstance(field, models.AutoField):
                 # The historical model gets its own AutoField, so any
