@@ -70,6 +70,6 @@ try:
         },                                              
     )]
     
-    add_introspection_rules(user_rules, ["^history\.current_context\.CurrentUserField"])
+    add_introspection_rules(user_rules, ["^django_history\.current_context\.CurrentUserField"])
 except:
     pass
