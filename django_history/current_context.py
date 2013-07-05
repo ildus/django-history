@@ -3,14 +3,13 @@ from django.db import models
 from django.db.models import signals
 from django.utils.functional import curry
 from django.utils.decorators import decorator_from_middleware
-from django.conf import settings
-
 
 try:
-    user_model = settings.AUTH_USER_MODEL
-except AttributeError:
+    from django.contrib.auth import get_user_model
+except ImportError: # django < 1.5
     from django.contrib.auth.models import User
-    user_model = User
+else:
+    user_model = get_user_model()
 
 
 class FieldRegistry(object):
