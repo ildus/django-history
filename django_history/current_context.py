@@ -4,12 +4,15 @@ from django.db.models import signals
 from django.utils.functional import curry
 from django.utils.decorators import decorator_from_middleware
 
-try:
-    from django.contrib.auth import get_user_model
-except ImportError: # django < 1.5
-    from django.contrib.auth.models import User
-else:
-    user_model = get_user_model()
+
+def get_user_model():
+    try:
+        from django.contrib.auth import get_user_model
+    except ImportError: # django < 1.5
+        from django.contrib.auth.models import User
+        return User
+    else:
+        return get_user_model()
 
 
 class FieldRegistry(object):
@@ -59,7 +62,7 @@ record_current_context = decorator_from_middleware(CurrentUserMiddleware)
 class CurrentUserField(models.ForeignKey):
     def __init__(self, one_time = False, **kwargs):
         self.one_time = one_time
-        super(CurrentUserField, self).__init__(user_model, null=True, **kwargs)
+        super(CurrentUserField, self).__init__(get_user_model(), null=True, **kwargs)
 
     def contribute_to_class(self, cls, name):
         super(CurrentUserField, self).contribute_to_class(cls, name)
@@ -75,7 +78,7 @@ try:
         (CurrentUserField,),                        
         [],                                             
         {                                               
-            'to': ['rel.to', {'default': user_model}],        
+            'to': ['rel.to', {'default': get_user_model()}],        
             'null': ['null', {'default': True}],        
         },                                              
     )]
