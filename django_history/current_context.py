@@ -1,10 +1,19 @@
 #coding: utf-8
-
 from django.db import models
 from django.db.models import signals
 from django.utils.functional import curry
 from django.utils.decorators import decorator_from_middleware
-from django.contrib.auth.models import User
+
+
+def get_user_model():
+    try:
+        from django.contrib.auth import get_user_model
+    except ImportError: # django < 1.5
+        from django.contrib.auth.models import User
+        return User
+    else:
+        return get_user_model()
+
 
 class FieldRegistry(object):
     _registry = {}
@@ -18,6 +27,7 @@ class FieldRegistry(object):
 
     def __contains__(self, model):
         return model in self.__class__._registry
+
 
 class CurrentUserMiddleware(object):
     def process_request(self, request):
@@ -45,17 +55,20 @@ class CurrentUserMiddleware(object):
         signals.pre_save.disconnect(dispatch_uid=request)
         return response
     
+
 record_current_context = decorator_from_middleware(CurrentUserMiddleware)
+
     
 class CurrentUserField(models.ForeignKey):
     def __init__(self, one_time = False, **kwargs):
         self.one_time = one_time
-        super(CurrentUserField, self).__init__(User, null=True, **kwargs)
+        super(CurrentUserField, self).__init__(get_user_model(), null=True, **kwargs)
 
     def contribute_to_class(self, cls, name):
         super(CurrentUserField, self).contribute_to_class(cls, name)
         registry = FieldRegistry()
         registry.add_field(cls, self)
+    
         
 try:
     from south.modelsinspector import add_introspection_rules
@@ -65,7 +78,7 @@ try:
         (CurrentUserField,),                        
         [],                                             
         {                                               
-            'to': ['rel.to', {'default': User}],        
+            'to': ['rel.to', {'default': get_user_model()}],        
             'null': ['null', {'default': True}],        
         },                                              
     )]
