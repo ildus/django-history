@@ -166,10 +166,11 @@ class HistoricalRecords(object):
         Returns a dictionary of fields that will be added to
         the Meta inner class of the historical record model.
         """
-        return {
-            'ordering': ('-history_date',),
-            'get_latest_by': 'history_date',
-        }
+        options = {'ordering': ('-history_date',),
+                   'get_latest_by': 'history_date'}
+        if model._meta.app_label:
+            options['app_label'] = model._meta.app_label
+        return options
 
     def pre_save(self, instance, **kwargs):
         if instance.pk:
