@@ -1,7 +1,5 @@
 #coding: utf-8
 
-import datetime
-
 from django.db import models
 
 from django_history.current_context import CurrentUserField
@@ -9,6 +7,7 @@ from django_history.manager import HistoryDescriptor
 
 import cPickle as pickle
 from copy import copy
+from django.utils import timezone
 from django.utils.functional import curry
 from django.utils.encoding import force_unicode
 from django.core.exceptions import ObjectDoesNotExist
@@ -130,7 +129,7 @@ class HistoricalRecords(object):
             
             #fields of history item
             'history_id': models.AutoField(primary_key=True),
-            'history_date': models.DateTimeField(default=datetime.datetime.now),
+            'history_date': models.DateTimeField(default=timezone.now),
             'history_user': CurrentUserField(related_name=rel_nm),
             'history_data': models.TextField(), #here is only the changed data
             'history_all_data': models.TextField(blank = True, null = True), #here saved all data of item
@@ -288,7 +287,7 @@ class FullHistoricalRecords(object):
         rel_nm = '_%s_history' % model._meta.object_name.lower()
         return {
             'history_id': models.AutoField(primary_key=True),
-            'history_date': models.DateTimeField(default=datetime.datetime.now),
+            'history_date': models.DateTimeField(default=timezone.now),
             'history_user': CurrentUserField(related_name=rel_nm),
             'history_type': models.CharField(max_length=1, choices=(
                 ('+', 'Created'),
